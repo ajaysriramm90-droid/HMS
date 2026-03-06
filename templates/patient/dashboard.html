@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Welcome, {{ current_user.name }}</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-stethoscope"></i> Available Departments</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for department in departments %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ department.name }}</h5>
+                                <p class="card-text text-muted">{{ department.description }}</p>
+                                <a href="{{ url_for('patient_doctors', department_id=department.id) }}" class="btn btn-sm btn-primary">
+                                    View Doctors
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-calendar-check"></i> Upcoming Appointments</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_appointments %}
+                <ul class="list-group list-group-flush">
+                    {% for appointment in upcoming_appointments %}
+                    <li class="list-group-item">
+                        <strong>Dr. {{ appointment.doctor.name }}</strong><br>
+                        <small class="text-muted">{{ appointment.appointment_date }} at {{ appointment.appointment_time }}</small>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ url_for('patient_appointments') }}" class="btn btn-sm btn-success mt-3 w-100">View All</a>
+                {% else %}
+                <p class="text-muted">No upcoming appointments.</p>
+                <a href="{{ url_for('patient_doctors') }}" class="btn btn-sm btn-primary w-100">Book Appointment</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

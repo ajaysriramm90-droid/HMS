@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Patient History{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Patient History - {{ patient.name }}</h2>
+
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h5>Patient Information</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Name:</strong> {{ patient.name }}</p>
+                <p><strong>Email:</strong> {{ patient.email }}</p>
+                <p><strong>Phone:</strong> {{ patient.phone }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Blood Group:</strong> {{ patient.blood_group or 'N/A' }}</p>
+                <p><strong>Gender:</strong> {{ patient.gender or 'N/A' }}</p>
+                <p><strong>Date of Birth:</strong> {{ patient.date_of_birth or 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5>Medical History</h5>
+    </div>
+    <div class="card-body">
+        {% if appointments %}
+        {% for appointment in appointments %}
+        <div class="border rounded p-3 mb-3">
+            <h6 class="text-primary">{{ appointment.appointment_date }} - {{ appointment.appointment_time }}</h6>
+            {% if appointment.treatment %}
+            <p><strong>Diagnosis:</strong> {{ appointment.treatment.diagnosis }}</p>
+            <p><strong>Prescription:</strong> {{ appointment.treatment.prescription }}</p>
+            <p><strong>Notes:</strong> {{ appointment.treatment.notes or 'No additional notes' }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted">No medical history available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<a href="{{ url_for('doctor_patients') }}" class="btn btn-secondary mt-3">
+    <i class="fas fa-arrow-left"></i> Back to Patients
+</a>
+{% endblock %}

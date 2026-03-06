@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}My Appointments{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">My Appointments</h2>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Patient</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.id }}</td>
+                    <td>{{ appointment.patient.name }}</td>
+                    <td>{{ appointment.appointment_date }}</td>
+                    <td>{{ appointment.appointment_time }}</td>
+                    <td>{{ appointment.reason or 'N/A' }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if appointment.status == 'Completed' else 'primary' if appointment.status == 'Booked' else 'danger' }}">
+                            {{ appointment.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if appointment.status == 'Booked' %}
+                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#completeModal{{ appointment.id }}">
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                        {% elif appointment.status == 'Completed' %}
+                        <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewTreatmentModal{{ appointment.id }}">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <!-- Complete Appointment Modal -->
+                {% if appointment.status == 'Booked' %}
+                <div class="modal fade" id="completeModal{{ appointment.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Complete Appointment - {{ appointment.patient.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('doctor_complete_appointment', id=appointment.id) }}">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Diagnosis</label>
+                                        <textarea class="form-control" name="diagnosis" rows="4" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Prescription</label>
+                                        <textarea class="form-control" name="prescription" rows="4" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Additional Notes</label>
+                                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-success">Mark as Completed</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- View Treatment Modal -->
+                {% if appointment.status == 'Completed' and appointment.treatment %}
+                <div class="modal fade" id="viewTreatmentModal{{ appointment.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Treatment Details - {{ appointment.patient.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Date:</strong> {{ appointment.appointment_date }}</p>
+                                <hr>
+                                <h6>Diagnosis:</h6>
+                                <p>{{ appointment.treatment.diagnosis }}</p>
+                                <hr>
+                                <h6>Prescription:</h6>
+                                <p>{{ appointment.treatment.prescription }}</p>
+                                <hr>
+                                <h6>Notes:</h6>
+                                <p>{{ appointment.treatment.notes or 'No additional notes' }}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

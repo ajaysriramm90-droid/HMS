@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Welcome, Dr. {{ current_user.name }}</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Upcoming Appointments</h5>
+                <h2>{{ upcoming_appointments|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Patients</h5>
+                <h2>{{ total_patients }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Completed Today</h5>
+                <h2>{{ completed_today }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Upcoming Appointments (Next 7 Days)</h4>
+    </div>
+    <div class="card-body">
+        {% if upcoming_appointments %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Patient Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in upcoming_appointments %}
+                <tr>
+                    <td>{{ appointment.patient.name }}</td>
+                    <td>{{ appointment.appointment_date }}</td>
+                    <td>{{ appointment.appointment_time }}</td>
+                    <td>{{ appointment.reason or 'N/A' }}</td>
+                    <td><span class="badge bg-primary">{{ appointment.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No upcoming appointments in the next 7 days.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

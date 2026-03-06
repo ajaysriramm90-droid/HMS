@@ -1,0 +1,509 @@
+{% extends "base.html" %}
+{% block title %}Register - Premium HMS{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at center, #111827 0%, #030712 100%);
+    min-height: 100vh;
+}
+
+/* ===== CANVAS BACKGROUND ===== */
+#bgCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ===== CONTAINER ===== */
+.register-container {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+    padding: 40px 20px;
+}
+
+/* ===== PREMIUM GLASS CARD ===== */
+.register-card {
+    width: 100%;
+    max-width: 850px; /* Wider card for a 2-column layout */
+    padding: 40px 50px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 
+                inset 0 0 20px rgba(59, 130, 246, 0.05);
+    color: white;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+    animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeUp {
+    from {opacity:0; transform: translateY(50px) scale(0.95);}
+    to {opacity:1; transform: translateY(0) scale(1);}
+}
+
+.register-title {
+    text-align: center;
+    margin-bottom: 35px;
+    transform: translateZ(30px);
+}
+
+.register-title i {
+    font-size: 35px;
+    background: -webkit-linear-gradient(45deg, #3b82f6, #06b6d4);
+    background: linear-gradient(45deg, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    margin-bottom: 10px;
+}
+
+.register-title h2 {
+    color: #ffffff;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+    letter-spacing: 1px;
+    font-size: 1.8rem;
+}
+
+/* ===== INTERACTIVE INPUTS ===== */
+.form-group {
+    position: relative;
+    margin-bottom: 25px;
+    transform: translateZ(20px);
+}
+
+.form-group i.icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    transition: 0.3s ease;
+    z-index: 2;
+}
+
+/* Specific adjustment for textarea icon */
+.form-group.textarea-group i.icon {
+    top: 24px;
+}
+
+.form-control, select, textarea {
+    width: 100%;
+    padding: 16px 16px 16px 45px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.6);
+    color: #ffffff !important; 
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* Fix calendar icon color for dark mode */
+input[type="date"] {
+    color-scheme: dark;
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Floating Label Logic */
+.floating-label {
+    position: absolute;
+    left: 45px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 3;
+}
+
+.textarea-group .floating-label {
+    top: 24px;
+}
+
+.form-control:focus, 
+.form-control:not(:placeholder-shown),
+select:focus,
+select:valid {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+/* Float label to top active state */
+.form-control:focus ~ .floating-label,
+.form-control:not(:placeholder-shown) ~ .floating-label,
+select:focus ~ .floating-label,
+select:valid ~ .floating-label,
+input[type="date"] ~ .floating-label {
+    top: -10px;
+    left: 12px;
+    font-size: 12px;
+    color: #ffffff !important; 
+    background: #111827; 
+    padding: 0 8px;
+    border-radius: 4px;
+}
+
+.form-control:focus ~ i.icon,
+select:focus ~ i.icon,
+textarea:focus ~ i.icon {
+    color: #3b82f6;
+}
+
+select { appearance: none; cursor: pointer; }
+select option { background: #0f172a !important; color: #ffffff !important; }
+
+/* Autofill Fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff !important;
+    transition: background-color 9999s ease-in-out 0s;
+    box-shadow: 0 0 0px 1000px #1e293b inset !important;
+}
+
+/* Password Toggle */
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #64748b;
+    transition: 0.3s;
+    z-index: 5;
+}
+.toggle-password:hover { color: #fff; }
+
+/* ===== BUTTON ===== */
+.btn-register {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: translateZ(25px);
+    position: relative;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.btn-register::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    transition: 0.5s;
+}
+
+.btn-register:hover {
+    transform: translateZ(25px) translateY(-3px);
+    box-shadow: 0 15px 30px rgba(6, 182, 212, 0.4);
+}
+.btn-register:hover::after { left: 150%; }
+
+/* ===== FOOTER ===== */
+.footer-text {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: #94a3b8;
+    transform: translateZ(10px);
+}
+.footer-text a {
+    color: #06b6d4;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+}
+.footer-text a:hover {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+}
+
+/* Responsive adjustment for padding */
+@media (max-width: 768px) {
+    .register-card { padding: 30px 20px; }
+}
+</style>
+
+<div class="register-container">
+    <canvas id="bgCanvas"></canvas>
+    
+    <div class="register-card" id="tiltCard">
+        <div class="register-title">
+            <i class="fas fa-hospital-user"></i>
+            <h2>Patient Registration</h2>
+            <p style="color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin:0;">Create Your Account</p>
+        </div>
+
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <i class="fas fa-user icon"></i>
+                        <input type="text" class="form-control" id="username" name="username" placeholder=" " required>
+                        <label class="floating-label">Username *</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" class="form-control" id="password" name="password" placeholder=" " required>
+                        <label class="floating-label">Password *</label>
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword()"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <i class="fas fa-id-card icon"></i>
+                        <input type="text" class="form-control" id="name" name="name" placeholder=" " required>
+                        <label class="floating-label">Full Name *</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <i class="fas fa-envelope icon"></i>
+                        <input type="email" class="form-control" id="email" name="email" placeholder=" " required>
+                        <label class="floating-label">Email Address *</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <i class="fas fa-phone icon"></i>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder=" ">
+                        <label class="floating-label">Phone Number</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <i class="fas fa-calendar icon"></i>
+                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
+                        <label class="floating-label" style="top: -10px; left: 12px; font-size: 12px; background: #111827; padding: 0 8px; border-radius: 4px;">Date of Birth</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <i class="fas fa-venus-mars icon"></i>
+                        <select class="form-control" id="gender" name="gender">
+                            <option value="" disabled selected hidden></option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <label class="floating-label">Gender</label>
+                        <i class="fas fa-chevron-down" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none;"></i>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <i class="fas fa-droplet icon" style="color: #ef4444;"></i>
+                        <input type="text" class="form-control" id="blood_group" name="blood_group" placeholder=" ">
+                        <label class="floating-label">Blood Group (e.g., O+)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group textarea-group">
+                <i class="fas fa-location-dot icon"></i>
+                <textarea class="form-control" id="address" name="address" placeholder=" "></textarea>
+                <label class="floating-label">Residential Address</label>
+            </div>
+
+            <button type="submit" class="btn-register">Create Account</button>
+        </form>
+
+        <div class="footer-text">
+            Already registered? <br>
+            <a href="{{ url_for('login') }}">Return to Secure Login</a>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- 1. Canvas Particle System with Mouse Interaction ---
+const canvas = document.getElementById("bgCanvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particlesArray = [];
+let mouse = { x: null, y: null, radius: 150 };
+
+window.addEventListener('mousemove', function(event) {
+    mouse.x = event.x;
+    mouse.y = event.y;
+});
+
+class Particle {
+    constructor(x, y, size, speedX, speedY) {
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.speedX = speedX;
+        this.speedY = speedY;
+        this.density = (Math.random() * 30) + 1;
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+        if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+
+        let dx = mouse.x - this.x;
+        let dy = mouse.y - this.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < mouse.radius) {
+            const forceDirectionX = dx / distance;
+            const forceDirectionY = dy / distance;
+            const force = (mouse.radius - distance) / mouse.radius;
+            const directionX = forceDirectionX * force * this.density;
+            const directionY = forceDirectionY * force * this.density;
+            
+            this.x -= directionX;
+            this.y -= directionY;
+        }
+    }
+    draw() {
+        ctx.fillStyle = "rgba(56, 189, 248, 0.5)"; 
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function init() {
+    particlesArray = [];
+    let numberOfParticles = (canvas.width * canvas.height) / 9000;
+    for (let i = 0; i < numberOfParticles; i++) {
+        let size = (Math.random() * 2) + 1;
+        let x = Math.random() * canvas.width;
+        let y = Math.random() * canvas.height;
+        let speedX = (Math.random() - 0.5) * 1;
+        let speedY = (Math.random() - 0.5) * 1;
+        particlesArray.push(new Particle(x, y, size, speedX, speedY));
+    }
+}
+
+function connectParticles() {
+    for (let a = 0; a < particlesArray.length; a++) {
+        for (let b = a; b < particlesArray.length; b++) {
+            let dx = particlesArray[a].x - particlesArray[b].x;
+            let dy = particlesArray[a].y - particlesArray[b].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 150) {
+                let opacity = 1 - (distance / 150);
+                ctx.strokeStyle = `rgba(59, 130, 246, ${opacity * 0.4})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < particlesArray.length; i++) {
+        particlesArray[i].update();
+        particlesArray[i].draw();
+    }
+    connectParticles();
+    requestAnimationFrame(animate);
+}
+
+init();
+animate();
+
+window.addEventListener("resize", function() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    init();
+});
+
+// --- 2. 3D Card Tilt Effect ---
+// Tweaked the divisor from 25 to 60 because the card is larger, 
+// making the tilt smoother and less aggressive.
+const card = document.getElementById('tiltCard');
+const container = document.querySelector('.register-container');
+
+container.addEventListener('mousemove', (e) => {
+    let xAxis = (window.innerWidth / 2 - e.pageX) / 60;
+    let yAxis = (window.innerHeight / 2 - e.pageY) / 60;
+    card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+});
+
+container.addEventListener('mouseenter', (e) => {
+    card.style.transition = 'none';
+});
+
+container.addEventListener('mouseleave', (e) => {
+    card.style.transition = 'transform 0.5s ease';
+    card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+});
+
+// --- 3. Password Toggle ---
+function togglePassword() {
+    const passInput = document.getElementById('password');
+    const eyeIcon = document.querySelector('.toggle-password');
+    if (passInput.type === 'password') {
+        passInput.type = 'text';
+        eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+        eyeIcon.style.color = '#3b82f6';
+    } else {
+        passInput.type = 'password';
+        eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+        eyeIcon.style.color = '#64748b';
+    }
+}
+</script>
+{% endblock %}

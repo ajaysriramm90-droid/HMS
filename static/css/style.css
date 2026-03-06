@@ -1,0 +1,35 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.btn {
+    border-radius: 5px;
+}
+
+.table {
+    background-color: rgb(12, 212, 95);
+}
+
+.badge {
+    padding: 0.5em 0.8em;
+}
+
+.modal-content {
+    border-radius: 10px;
+}
