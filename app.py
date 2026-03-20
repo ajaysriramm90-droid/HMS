@@ -318,12 +318,13 @@ def admin_appointments():
     appointments = Appointment.query.order_by(Appointment.appointment_date.desc()).all()
     return render_template('admin/appointments.html', appointments=appointments)
 
-@app.route('/admin/appointment/cancel/<int:id>')
+@app.route('/admin/appointment/cancel/<int:id>', methods=['POST'])
 @login_required
 @role_required('admin')
 def admin_cancel_appointment(id):
     appointment = Appointment.query.get_or_404(id)
     appointment.status = 'Cancelled'
+    appointment.cancel_reason = request.form.get('cancel_reason')
     db.session.commit()
     flash('Appointment cancelled successfully', 'success')
     return redirect(url_for('admin_appointments'))
@@ -560,7 +561,7 @@ def patient_appointments():
     appointments = Appointment.query.filter_by(patient_id=current_user.id).order_by(Appointment.appointment_date.desc()).all()
     return render_template('patient/appointments.html', appointments=appointments)
 
-@app.route('/patient/appointment/cancel/<int:id>')
+@app.route('/patient/appointment/cancel/<int:id>', methods=['POST'])
 @login_required
 @role_required('patient')
 def patient_cancel_appointment(id):
@@ -571,6 +572,7 @@ def patient_cancel_appointment(id):
         return redirect(url_for('patient_appointments'))
     
     appointment.status = 'Cancelled'
+    appointment.cancel_reason = request.form.get('cancel_reason')
     db.session.commit()
     
     flash('Appointment cancelled successfully', 'success')
