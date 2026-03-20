@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Find Doctors{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Find Doctors</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-5">
+                <input type="text" class="form-control" name="search" placeholder="Search by doctor name" value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-5">
+                <select class="form-select" name="department_id">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if request.args.get('department_id') == dept.id|string %}selected{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    {% for doctor in doctors %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-user-md"></i> Dr. {{ doctor.name }}</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Department:</strong> {{ doctor.department.name }}</p>
+                <p><strong>Qualification:</strong> {{ doctor.qualification or 'N/A' }}</p>
+                <p><strong>Experience:</strong> {{ doctor.experience_years or 'N/A' }} years</p>
+                <p><strong>Email:</strong> {{ doctor.email }}</p>
+                <p><strong>Phone:</strong> {{ doctor.phone or 'N/A' }}</p>
+                <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#bookModal{{ doctor.id }}">
+                    <i class="fas fa-calendar-plus"></i> Book Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Appointment Modal -->
+    <div class="modal fade" id="bookModal{{ doctor.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Book Appointment - Dr. {{ doctor.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('patient_book_appointment', doctor_id=doctor.id) }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Date</label>
+                            <input type="date" class="form-control" name="appointment_date" 
+                                   min="{{ today.strftime('%Y-%m-%d') }}" 
+                                   max="{{ week_later.strftime('%Y-%m-%d') }}" required>
+                            <small class="text-muted">You can book appointments for the next 7 days</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Time</label>
+                            <input type="time" class="form-control" name="appointment_time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason for Visit</label>
+                            <textarea class="form-control" name="reason" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Book Appointment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not doctors %}
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> No doctors found. Try a different search.
+</div>
+{% endif %}
+{% endblock %}
