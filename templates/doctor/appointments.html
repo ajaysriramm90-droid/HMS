@@ -48,6 +48,11 @@
                             data-bs-target="#viewTreatmentModal{{ appointment.id }}">
                             <i class="fas fa-eye"></i> View
                         </button>
+                        {% elif appointment.status == 'Cancelled' and appointment.cancel_reason %}
+                        <button class="btn btn-sm btn-secondary" data-bs-toggle="modal"
+                            data-bs-target="#viewCancelReasonModal{{ appointment.id }}">
+                            <i class="fas fa-eye"></i> View Reason
+                        </button>
                         {% endif %}
                     </td>
                 </tr>
@@ -136,6 +141,29 @@
                                 <hr>
                                 <h6>Notes:</h6>
                                 <p>{{ appointment.treatment.notes or 'No additional notes' }}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- View Cancel Reason Modal -->
+                {% if appointment.status == 'Cancelled' and appointment.cancel_reason %}
+                <div class="modal fade" id="viewCancelReasonModal{{ appointment.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Cancellation Reason</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Patient:</strong> {{ appointment.patient.name }}</p>
+                                <hr>
+                                <h6>Reason:</h6>
+                                <p>{{ appointment.cancel_reason }}</p>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
