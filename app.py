@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, Admin, Doctor, Patient, Department, Appointment, Treatment, DoctorAvailability
@@ -609,4 +610,5 @@ def patient_profile():
 
 if __name__ == '__main__':
     init_database()
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
