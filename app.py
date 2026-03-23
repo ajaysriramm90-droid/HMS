@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, Admin, Doctor, Patient, Department, Appointment, Treatment, DoctorAvailability
 from config import Config
@@ -609,6 +609,28 @@ def patient_profile():
         return redirect(url_for('patient_profile'))
     
     return render_template('patient/profile.html')
+
+@app.route('/api/doctor/<int:doctor_id>/booked_slots')
+@login_required
+@role_required('patient')
+def api_booked_slots(doctor_id):
+    date_str = request.args.get('date')
+    if not date_str:
+        return jsonify([])
+    
+    try:
+        check_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify([])
+        
+    appointments = Appointment.query.filter_by(
+        doctor_id=doctor_id,
+        appointment_date=check_date,
+        status='Booked'
+    ).all()
+    
+    booked_times = [appt.appointment_time.strftime('%H:%M') for appt in appointments]
+    return jsonify(booked_times)
 
 if __name__ == '__main__':
     init_database()

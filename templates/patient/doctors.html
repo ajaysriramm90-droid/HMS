@@ -60,14 +60,15 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Appointment Date</label>
-                            <input type="date" class="form-control" name="appointment_date" 
+                            <input type="date" class="form-control appointment-date-input" name="appointment_date" 
+                                   data-doctor-id="{{ doctor.id }}"
                                    min="{{ today.strftime('%Y-%m-%d') }}" 
                                    max="{{ week_later.strftime('%Y-%m-%d') }}" required>
                             <small class="text-muted">You can book appointments for the next 7 days</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Appointment Time</label>
-                            <select class="form-select" name="appointment_time" required>
+                            <select class="form-select appointment-time-select" name="appointment_time" required>
                                 <option value="" disabled selected>Select a time slot</option>
                                 <option value="08:00">08:00 AM</option>
                                 <option value="08:30">08:30 AM</option>
@@ -106,4 +107,49 @@
     <i class="fas fa-info-circle"></i> No doctors found. Try a different search.
 </div>
 {% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInputs = document.querySelectorAll('.appointment-date-input');
+    
+    dateInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const dateStr = this.value;
+            const doctorId = this.getAttribute('data-doctor-id');
+            const form = this.closest('form');
+            const timeSelect = form.querySelector('.appointment-time-select');
+            
+            if (!dateStr) {
+                Array.from(timeSelect.options).forEach(opt => {
+                    if (opt.value) {
+                        opt.classList.remove('text-danger', 'text-success');
+                        opt.disabled = false;
+                    }
+                });
+                return;
+            }
+            
+            fetch(`/api/doctor/${doctorId}/booked_slots?date=${dateStr}`)
+                .then(response => response.json())
+                .then(bookedSlots => {
+                    Array.from(timeSelect.options).forEach(opt => {
+                        if (!opt.value) return; // Skip placeholder options
+                        
+                        if (bookedSlots.includes(opt.value)) {
+                            opt.classList.remove('text-success');
+                            opt.classList.add('text-danger');
+                            opt.disabled = true;
+                        } else {
+                            opt.classList.remove('text-danger');
+                            opt.classList.add('text-success');
+                            opt.disabled = false;
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching booked slots:', error));
+        });
+    });
+});
+</script>
+
 {% endblock %}
