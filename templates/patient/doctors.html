@@ -67,7 +67,23 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Appointment Time</label>
-                            <input type="time" class="form-control" name="appointment_time" required>
+                            <select class="form-select" name="appointment_time" required>
+                                <option value="" disabled selected>Select a time slot</option>
+                                <option value="08:00">08:00 AM</option>
+                                <option value="08:30">08:30 AM</option>
+                                <option value="09:00">09:00 AM</option>
+                                <option value="09:30">09:30 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="10:30">10:30 AM</option>
+                                <option disabled>--- Lunch Break (11:00 AM - 12:00 PM) ---</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="12:30">12:30 PM</option>
+                                <option value="13:00">01:00 PM</option>
+                                <option value="13:30">01:30 PM</option>
+                                <option value="14:00">02:00 PM</option>
+                                <option value="14:30">02:30 PM</option>
+                                <option value="15:00">03:00 PM</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Reason for Visit</label>
