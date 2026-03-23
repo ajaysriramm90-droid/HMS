@@ -68,8 +68,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Appointment Time</label>
-                            <select class="form-select appointment-time-select" name="appointment_time" required>
-                                <option value="" disabled selected>Select a time slot</option>
+                            <select class="form-select appointment-time-select" name="appointment_time" required disabled>
+                                <option value="" disabled selected>Select a date first</option>
                                 <option value="08:00">08:00 AM</option>
                                 <option value="08:30">08:30 AM</option>
                                 <option value="09:00">09:00 AM</option>
@@ -120,6 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const timeSelect = form.querySelector('.appointment-time-select');
             
             if (!dateStr) {
+                timeSelect.disabled = true;
+                timeSelect.options[0].text = 'Select a date first';
                 Array.from(timeSelect.options).forEach(opt => {
                     if (opt.value) {
                         opt.classList.remove('text-danger', 'text-success');
@@ -132,6 +134,13 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(`/api/doctor/${doctorId}/booked_slots?date=${dateStr}`)
                 .then(response => response.json())
                 .then(bookedSlots => {
+                    const allSlotsCount = 13; // Total bookable slots
+                    const isUnavailable = bookedSlots.length >= allSlotsCount;
+                    
+                    timeSelect.disabled = isUnavailable;
+                    timeSelect.options[0].text = isUnavailable ? 'Doctor is unavailable this day' : 'Select a time slot';
+                    timeSelect.value = ""; // Reset to placeholder selection
+                    
                     Array.from(timeSelect.options).forEach(opt => {
                         if (!opt.value) return; // Skip placeholder options
                         
