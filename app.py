@@ -370,10 +370,16 @@ def doctor_dashboard():
         Appointment.status == 'Completed'
     ).count()
     
+    upcoming_leaves = DoctorLeave.query.filter(
+        DoctorLeave.doctor_id == current_user.id,
+        DoctorLeave.date >= today
+    ).order_by(DoctorLeave.date).all()
+    
     return render_template('doctor/dashboard.html',
                          upcoming_appointments=upcoming_appointments,
                          total_patients=total_patients,
                          completed_today=completed_today,
+                         upcoming_leaves=upcoming_leaves,
                          today=today,
                          week_later=week_later)
 
@@ -398,9 +404,34 @@ def doctor_apply_leave():
     else:
         leave = DoctorLeave(doctor_id=current_user.id, date=leave_date)
         db.session.add(leave)
-        db.session.commit()
-        flash('Leave applied successfully. Patients cannot book appointments on this date.', 'success')
         
+        appointments_to_cancel = Appointment.query.filter_by(
+            doctor_id=current_user.id, 
+            appointment_date=leave_date, 
+            status='Booked'
+        ).all()
+        
+        for appt in appointments_to_cancel:
+            appt.status = 'Cancelled'
+            appt.cancel_reason = 'Doctor on Leave'
+            
+        db.session.commit()
+        flash(f'Leave applied successfully. {len(appointments_to_cancel)} existing appointments were automatically cancelled.', 'success')
+        
+    return redirect(url_for('doctor_dashboard'))
+
+@app.route('/doctor/cancel_leave/<int:id>', methods=['POST'])
+@login_required
+@role_required('doctor')
+def doctor_cancel_leave(id):
+    leave = DoctorLeave.query.get_or_404(id)
+    if leave.doctor_id != current_user.id:
+        flash('Unauthorized', 'danger')
+        return redirect(url_for('doctor_dashboard'))
+        
+    db.session.delete(leave)
+    db.session.commit()
+    flash('Leave cancelled safely. Patients can now book appointments on this date again.', 'success')
     return redirect(url_for('doctor_dashboard'))
 
 @app.route('/doctor/appointments')
