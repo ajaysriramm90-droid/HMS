@@ -373,7 +373,35 @@ def doctor_dashboard():
     return render_template('doctor/dashboard.html',
                          upcoming_appointments=upcoming_appointments,
                          total_patients=total_patients,
-                         completed_today=completed_today)
+                         completed_today=completed_today,
+                         today=today,
+                         week_later=week_later)
+
+@app.route('/doctor/apply_leave', methods=['POST'])
+@login_required
+@role_required('doctor')
+def doctor_apply_leave():
+    leave_date_str = request.form.get('leave_date')
+    if not leave_date_str:
+        flash('Please select a date', 'danger')
+        return redirect(url_for('doctor_dashboard'))
+        
+    try:
+        leave_date = datetime.strptime(leave_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        flash('Invalid date format', 'danger')
+        return redirect(url_for('doctor_dashboard'))
+    
+    exists = DoctorLeave.query.filter_by(doctor_id=current_user.id, date=leave_date).first()
+    if exists:
+        flash('You are already on leave for this date.', 'warning')
+    else:
+        leave = DoctorLeave(doctor_id=current_user.id, date=leave_date)
+        db.session.add(leave)
+        db.session.commit()
+        flash('Leave applied successfully. Patients cannot book appointments on this date.', 'success')
+        
+    return redirect(url_for('doctor_dashboard'))
 
 @app.route('/doctor/appointments')
 @login_required
@@ -529,9 +557,15 @@ def patient_book_appointment(doctor_id):
     appointment_time = request.form.get('appointment_time')
     reason = request.form.get('reason')
     
+    app_date = datetime.strptime(appointment_date, '%Y-%m-%d').date()
+    leave = DoctorLeave.query.filter_by(doctor_id=doctor_id, date=app_date).first()
+    if leave:
+        flash('This doctor is on leave on the selected date.', 'danger')
+        return redirect(url_for('patient_doctors'))
+        
     existing = Appointment.query.filter_by(
         doctor_id=doctor_id,
-        appointment_date=datetime.strptime(appointment_date, '%Y-%m-%d').date(),
+        appointment_date=app_date,
         appointment_time=datetime.strptime(appointment_time, '%H:%M').time(),
         status='Booked'
     ).first()
@@ -622,6 +656,11 @@ def api_booked_slots(doctor_id):
         check_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
         return jsonify([])
+        
+    leave = DoctorLeave.query.filter_by(doctor_id=doctor_id, date=check_date).first()
+    if leave:
+        all_slots = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00"]
+        return jsonify(all_slots)
         
     appointments = Appointment.query.filter_by(
         doctor_id=doctor_id,

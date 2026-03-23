@@ -38,6 +38,7 @@ class Doctor(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     appointments = db.relationship('Appointment', backref='doctor', lazy=True)
     availabilities = db.relationship('DoctorAvailability', backref='doctor', lazy=True)
+    leaves = db.relationship('DoctorLeave', backref='doctor', lazy=True)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -73,6 +74,12 @@ class DoctorAvailability(db.Model):
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
     is_available = db.Column(db.Boolean, default=True)
+
+class DoctorLeave(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)

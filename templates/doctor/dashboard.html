@@ -32,6 +32,34 @@
     </div>
 </div>
 
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-calendar-times"></i> Apply for Leave</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('doctor_apply_leave') }}" method="POST" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Select Leave Date</label>
+                        <input type="date" class="form-control" name="leave_date" 
+                               min="{{ today.strftime('%Y-%m-%d') }}" 
+                               max="{{ week_later.strftime('%Y-%m-%d') }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-warning w-100">Confirm Leave</button>
+                    </div>
+                    <div class="col-md-5">
+                        <small class="text-muted d-block mt-2">
+                            Applying for leave will block patients from booking new appointments for the entire day.
+                        </small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card mt-4">
     <div class="card-header bg-primary text-white">
         <h4 class="mb-0">Upcoming Appointments (Next 7 Days)</h4>
