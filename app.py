@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, Admin, Doctor, Patient, Department, Appointment, Treatment, DoctorAvailability
+from models import db, Admin, Doctor, Patient, Department, Appointment, Treatment, DoctorAvailability, DoctorLeave
 from config import Config
 from datetime import datetime, timedelta, date, time
 from functools import wraps
@@ -671,7 +671,8 @@ def api_booked_slots(doctor_id):
     booked_times = [appt.appointment_time.strftime('%H:%M') for appt in appointments]
     return jsonify(booked_times)
 
+init_database()
+
 if __name__ == '__main__':
-    init_database()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
